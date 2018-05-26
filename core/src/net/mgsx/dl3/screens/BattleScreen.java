@@ -62,6 +62,8 @@ public class BattleScreen extends ScreenAdapter
 	
 	private FrameBuffer fboCollisions;
 	private ModelBatch batchCollisions;
+	private boolean pause;
+	private boolean touched;
 	
 	public BattleScreen() {
 		camera = new PerspectiveCamera(60f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -183,6 +185,14 @@ public class BattleScreen extends ScreenAdapter
 	@Override
 	public void render(float delta) 
 	{
+		if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
+			pause = !pause;
+		}
+		if(pause){
+			return;
+		}
+		touched = Gdx.input.isTouched();
+		
 		time += delta;
 		
 		float cameraDistance = 10;
@@ -208,7 +218,7 @@ public class BattleScreen extends ScreenAdapter
 		boolean hasImpact = false;
 		Ray ray = null; 
 		float rayLen = 20f;
-		if(Gdx.input.isTouched()){
+		if(touched){
 			ray = camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
 			
 			// TODO compute collisions
