@@ -10,4 +10,5 @@ public class Mob {
 	public Vector3 deltaCam = new Vector3();
 	public float time;
 	public boolean alive = true;
+	public int id;
 }

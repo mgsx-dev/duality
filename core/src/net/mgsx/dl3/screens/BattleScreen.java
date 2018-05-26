@@ -7,9 +7,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -20,10 +18,8 @@ import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
@@ -33,9 +29,11 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.JsonReader;
-import com.badlogic.gdx.utils.ScreenUtils;
 
+import net.mgsx.dl3.model.EnemyPart;
 import net.mgsx.dl3.model.Mob;
+import net.mgsx.dl3.utils.CollisionSystem;
+import net.mgsx.dl3.utils.Impact;
 
 public class BattleScreen extends ScreenAdapter
 {
@@ -44,26 +42,32 @@ public class BattleScreen extends ScreenAdapter
 	private Array<ModelInstance> models = new Array<ModelInstance>();
 	private float time;
 	private Vector3 cameraPosition = new Vector3();
-	private Environment env, colEnv;
+	private Environment env;
 	private Model levelModel;
 	private ModelInstance bossModel;
 	private AnimationController bossAnimator;
 	private Actor bossActor;
 	private Array<Mob> mobs = new Array<Mob>();
 	private float cameraAngle;
-	private float [] beamVertices;
 	private ImmediateModeRenderer20 shapeRenderer;
 	private Vector3 rayStart = new Vector3();
 	private Vector3 rayEnd = new Vector3();
 	private Vector3 rayTan = new Vector3();
 	private Vector3 rayPos = new Vector3();
 	private ShaderProgram beamShader, burstShader;
-	private Vector3 intersection = new Vector3();
 	
-	private FrameBuffer fboCollisions;
-	private ModelBatch batchCollisions;
+	private ColorAttribute lastColor;
+	private Color colorBackup = new Color();
+	
 	private boolean pause;
 	private boolean touched;
+	
+	private Array<EnemyPart> detachedParts = new Array<EnemyPart>();
+	
+	private CollisionSystem collisionSystem;
+	private int bossID;
+	
+	private EnemyPart emit1Part;
 	
 	public BattleScreen() {
 		camera = new PerspectiveCamera(60f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -106,14 +110,17 @@ public class BattleScreen extends ScreenAdapter
 		
 		shapeRenderer = new ImmediateModeRenderer20(4, false, true, 1, beamShader);
 		
-		int width = Gdx.graphics.getBackBufferWidth();
-		int height = Gdx.graphics.getBackBufferHeight();
-		fboCollisions = new FrameBuffer(Format.RGBA8888, width, height, true);
+		collisionSystem = new CollisionSystem();
 		
-		batchCollisions = new ModelBatch(Gdx.files.internal("shaders/collision.vs"), Gdx.files.internal("shaders/collision.fs"));
+		collisionSystem.addModel(bossModel);
+		bossID = collisionSystem.attachEntity(bossModel, "Boss");
 		
-		colEnv = new Environment();
-		colEnv.set(new ColorAttribute(ColorAttribute.Fog, Color.BLUE));
+		emit1Part = new EnemyPart();
+		emit1Part.model = bossModel;
+		emit1Part.node = bossModel.getNode("Emit1", true);
+		emit1Part.material = bossModel.getMaterial("Active");
+		emit1Part.id = collisionSystem.attachEntity(bossModel, "Active");
+		emit1Part.energy = emit1Part.energyMax = 1; // energy in seconds of beam
 	}
 	
 	private Action emit(final String emitterID, final String emittedID) 
@@ -122,6 +129,7 @@ public class BattleScreen extends ScreenAdapter
 			@Override
 			public void run() {
 				Node emitter = bossModel.getNode(emitterID, true);
+				if(emitter == null) return; // case detached
 				ModelInstance model = new ModelInstance(levelModel, emittedID);
 				model.nodes.first().translation.setZero();
 				model.calculateTransforms();
@@ -129,6 +137,7 @@ public class BattleScreen extends ScreenAdapter
 				mob.model = model;
 				mob.position.setZero().mul(emitter.globalTransform);
 				mob.direction.set(Vector3.Y).rot(emitter.globalTransform);
+				mob.id = collisionSystem.attachEntity(model);
 				mobs.add(mob);
 			}
 		});
@@ -166,22 +175,6 @@ public class BattleScreen extends ScreenAdapter
 		return action;
 	}
 	
-	// TODO set once
-	private void setColorCode(Material mat, int colorCode){
-//		ColorAttribute diffuse = mat.get(ColorAttribute.class, ColorAttribute.Diffuse);
-		if(!mat.has(ColorAttribute.Emissive)){
-			mat.set(new ColorAttribute(ColorAttribute.Emissive, new Color(colorCode)));
-		}else{
-			mat.get(ColorAttribute.class, ColorAttribute.Emissive).color.set(colorCode);
-		}
-	}
-	private void restoreColors(Material mat){
-//		ColorAttribute diffuse = mat.get(ColorAttribute.class, ColorAttribute.Diffuse);
-//		ColorAttribute emissive = mat.get(ColorAttribute.class, ColorAttribute.Emissive);
-//		diffuse.color.set(emissive.color);
-//		emissive.color.set(Color.BLACK);
-	}
-	
 	@Override
 	public void render(float delta) 
 	{
@@ -215,33 +208,30 @@ public class BattleScreen extends ScreenAdapter
 		camera.lookAt(0, 5, 0);
 		camera.update();
 		
-		boolean hasImpact = false;
 		Ray ray = null; 
 		float rayLen = 20f;
 		if(touched){
 			ray = camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
-			
-			// TODO compute collisions
-			Mob shootedMob = null;
-			for(Mob mob : mobs){
-				float mobRadius = .25f;
-				if(Intersector.intersectRaySphere(ray, mob.position, mobRadius, intersection)){
-					float dst = intersection.dst(ray.origin);
-					if(dst < rayLen){
-						rayLen = dst;
-						shootedMob = mob;
-					}
-				}
-			}
-			
-			if(shootedMob != null){
-				// TODO remove neergy to shootedMob
-				shootedMob.alive = false;
-				hasImpact = true;
-			}
+//			
+//			// TODO compute collisions
+//			Mob shootedMob = null;
+//			for(Mob mob : mobs){
+//				float mobRadius = .25f;
+//				if(Intersector.intersectRaySphere(ray, mob.position, mobRadius, intersection)){
+//					float dst = intersection.dst(ray.origin);
+//					if(dst < rayLen){
+//						rayLen = dst;
+//						shootedMob = mob;
+//					}
+//				}
+//			}
+//			
+//			if(shootedMob != null){
+//				// TODO remove neergy to shootedMob
+//				shootedMob.alive = false;
+//				hasImpact = true;
+//			}
 		}
-		
-		// TODO ScreenUtils.getFrameBufferPixels(x, y, w, h, flipY)
 		
 		bossActor.act(delta);
 		
@@ -270,52 +260,76 @@ public class BattleScreen extends ScreenAdapter
 		
 		for(int i=0 ; i<mobs.size ; ){
 			Mob mob = mobs.get(i);
-			if(mob.alive) i++; else mobs.removeIndex(i);
+			if(mob.alive) i++; else{
+				mobs.removeIndex(i);
+				collisionSystem.detachEntity(mob.id, mob.model);
+			}
 		}
 		
 		float lum = .5f;
 		Gdx.gl.glClearColor(lum, lum, lum, 0);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-		
-		// TODO use a special shader instead (bones and all but use only emissive as color code and give back depth)
-		Material matActive = models.first().getMaterial("Active");
-		setColorCode(matActive, 512);
-		Material matBody = models.first().getMaterial("Boss");
-		setColorCode(matBody, 256);
-		
-		fboCollisions.begin();
-
-		Gdx.gl.glClearColor(0, 0, 0, 0);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		
-		// TODO linked to shader (hard coded)
-		camera.near = 1f;
-		camera.far = 100f;
-		camera.update();
-		
-		batchCollisions.begin(camera);
-		batchCollisions.render(models, colEnv);
-		batchCollisions.end();
-		
-		byte[] bytes = ScreenUtils.getFrameBufferPixels(Gdx.input.getX(), Gdx.graphics.getBackBufferHeight() - Gdx.input.getY(), 1, 1, false);
-		if(Gdx.input.isTouched()){
-			int code = bytes[2] & 0xFF; // ((bytes[0] & 0xFF) << 24) | ((bytes[1] & 0xFF) << 16) | ((bytes[2] & 0xFF) << 8) | (bytes[3] & 0xFF);
-			int fog = bytes[3] & 0xFF;
-			if(fog > 0){
-				float frustrumDistance = MathUtils.lerp(camera.near, camera.far, (fog / 255f));
-				rayLen = frustrumDistance;
-				hasImpact = true;
-			}
-			System.out.println(code);
-			// System.out.println()); 
+		if(lastColor != null){
+			lastColor.color.set(colorBackup);
+			lastColor = null;
 		}
 		
-		fboCollisions.end();
+		Impact impact = collisionSystem.update(camera);
+		if(impact.occured){
+			rayLen = impact.distance;
+			
+			
+			for(Mob mob : mobs){
+				if(mob.id == impact.id){
+					mob.alive = false; // TODO energy
+				}
+			}
+			if(impact.id == bossID){
+				// nothing to do
+			}else if(impact.id == emit1Part.id){
+				// TODO flash part
+				emit1Part.energy -= delta;
+				
+				if(emit1Part.energy <= 0){
+					emit1Part.material.get(ColorAttribute.class, ColorAttribute.Diffuse).color.set(Color.BLACK);
+					// emit1Part.node.detach();
+					emit1Part.node.isAnimated = false;
+					detachedParts.add(emit1Part);
+				}else{
+					lastColor = emit1Part.material.get(ColorAttribute.class, ColorAttribute.Diffuse);
+				}
+			}
+		}
 		
-		// restore emissive
-		restoreColors(matActive);
-		restoreColors(matBody);
+		if(lastColor != null){
+			colorBackup.set(lastColor.color);
+			float freq = 20;
+			if((time * freq) % 2f > 1)
+				lastColor.color.set(Color.WHITE);
+		}
+		
+		
+		// update detached parts
+		for(int i=0 ; i<detachedParts.size ; )
+		{
+			EnemyPart part = detachedParts.get(i);
+			if(part.direction == null){
+				part.direction = new Vector3(part.node.translation).nor();
+			}
+			part.node.translation.mulAdd(part.direction, delta * 1f);
+			part.node.translation.y -= part.time * .003f;
+			part.node.isAnimated = false;
+			part.time += delta;
+			if(part.node.translation.y < 0 || part.time > 30){
+				emit1Part.node.detach();
+				// part.model.nodes.removeValue(part.node, true);
+				detachedParts.removeIndex(i);
+			}else{
+				i++;
+			}
+		}
+		
 		
 		batch.begin(camera);
 		batch.render(models, env);
@@ -370,7 +384,7 @@ public class BattleScreen extends ScreenAdapter
 			shapeRenderer.end();
 			
 			
-			if(hasImpact){
+			if(impact.occured){
 				
 				float impactSize = 3f;
 				shapeRenderer.begin(camera.combined, GL20.GL_TRIANGLE_STRIP);
