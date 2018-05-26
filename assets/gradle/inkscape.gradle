@@ -1,0 +1,40 @@
+buildscript {
+	repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    
+    apply from: "${sourceFile.parent}/common.gradle"
+    
+}
+
+apply plugin: 'java'
+
+task inkscapeAvailable(type: Exec){
+	commandLine 'inkscape', '-V'
+}
+
+def inkscapeEdit(src){
+	task "inkscapeEdit_${src}"(type: Exec, dependsOn: inkscapeAvailable, group: "gdx") {
+	  	description = "Edit SVG file"
+	  	commandLine 'inkscape', "$projectDir/$src"
+   	} 
+}
+
+def inkscapeExport(src, dst){
+	task "inkscapeExport_${src}"(type: Exec, dependsOn: inkscapeAvailable, group: "gdx") {
+	  	description = "Export SVG to PNG"
+	  	def inFile = new File("$projectDir/$src")
+	  	def name = inFile.name.take(inFile.name.lastIndexOf('.'))
+	  	def outFile = new File("$dst/${name}.png")
+		commandLine 'inkscape', '-z', "-e=$outFile", "$inFile"
+		outputs.upToDateWhen { outFile.exists() && inFile.lastModified() < outFile.lastModified() }
+   	} 
+}
+
+ext {
+    inkscapeEdit = this.&inkscapeEdit
+    inkscapeExport = this.&inkscapeExport
+}
+
+
