@@ -57,7 +57,7 @@ public class BattleScreen extends ScreenAdapter
 	private Vector3 rayEnd = new Vector3();
 	private Vector3 rayTan = new Vector3();
 	private Vector3 rayPos = new Vector3();
-	private ShaderProgram beamShader;
+	private ShaderProgram beamShader, burstShader;
 	private Vector3 intersection = new Vector3();
 	
 	private FrameBuffer fboCollisions;
@@ -98,6 +98,10 @@ public class BattleScreen extends ScreenAdapter
 		
 		beamShader = new ShaderProgram(Gdx.files.internal("shaders/beam.vs"), Gdx.files.internal("shaders/beam.fs"));
 		if(!beamShader.isCompiled()) throw new GdxRuntimeException(beamShader.getLog());
+		
+		burstShader = new ShaderProgram(Gdx.files.internal("shaders/burst.vs"), Gdx.files.internal("shaders/burst.fs"));
+		if(!burstShader.isCompiled()) throw new GdxRuntimeException(burstShader.getLog());
+		
 		shapeRenderer = new ImmediateModeRenderer20(4, false, true, 1, beamShader);
 		
 		int width = Gdx.graphics.getBackBufferWidth();
@@ -201,6 +205,7 @@ public class BattleScreen extends ScreenAdapter
 		camera.lookAt(0, 5, 0);
 		camera.update();
 		
+		boolean hasImpact = false;
 		Ray ray = null; 
 		float rayLen = 20f;
 		if(Gdx.input.isTouched()){
@@ -222,6 +227,7 @@ public class BattleScreen extends ScreenAdapter
 			if(shootedMob != null){
 				// TODO remove neergy to shootedMob
 				shootedMob.alive = false;
+				hasImpact = true;
 			}
 		}
 		
@@ -289,6 +295,7 @@ public class BattleScreen extends ScreenAdapter
 			if(fog > 0){
 				float frustrumDistance = MathUtils.lerp(camera.near, camera.far, (fog / 255f));
 				rayLen = frustrumDistance;
+				hasImpact = true;
 			}
 			System.out.println(code);
 			// System.out.println()); 
@@ -326,7 +333,7 @@ public class BattleScreen extends ScreenAdapter
 			beamShader.setUniformf("u_time", time);
 			
 			shapeRenderer.begin(camera.combined, GL20.GL_TRIANGLE_STRIP);
-			
+			shapeRenderer.setShader(beamShader);
 			float rayWidth = 1f;
 			
 			rayPos.set(rayStart).mulAdd(rayTan, rayWidth);
@@ -352,32 +359,38 @@ public class BattleScreen extends ScreenAdapter
 			
 			shapeRenderer.end();
 			
-			float impactSize = .3f;
-			shapeRenderer.begin(camera.combined, GL20.GL_TRIANGLE_STRIP);
 			
-			rayPos.set(rayEnd).mulAdd(rayTan, rayWidth).mulAdd(camera.up, impactSize);
-			shapeRenderer.color(Color.WHITE);
-			shapeRenderer.texCoord(0, 0);
-			shapeRenderer.vertex(rayPos.x, rayPos.y, rayPos.z);
+			if(hasImpact){
+				
+				float impactSize = 3f;
+				shapeRenderer.begin(camera.combined, GL20.GL_TRIANGLE_STRIP);
+				shapeRenderer.setShader(burstShader);
+				
+				rayPos.set(rayEnd).mulAdd(rayTan, impactSize).mulAdd(camera.up, impactSize);
+				shapeRenderer.color(Color.WHITE);
+				shapeRenderer.texCoord(0, 0);
+				shapeRenderer.vertex(rayPos.x, rayPos.y, rayPos.z);
+				
+				rayPos.set(rayEnd).mulAdd(rayTan, -impactSize).mulAdd(camera.up, impactSize);
+				shapeRenderer.color(Color.WHITE);
+				shapeRenderer.texCoord(1, 0);
+				shapeRenderer.vertex(rayPos.x, rayPos.y, rayPos.z);
+				
+				rayPos.set(rayEnd).mulAdd(rayTan, impactSize).mulAdd(camera.up, -impactSize);
+				shapeRenderer.color(Color.WHITE);
+				shapeRenderer.texCoord(0, 1);
+				shapeRenderer.vertex(rayPos.x, rayPos.y, rayPos.z);
+				
+				rayPos.set(rayEnd).mulAdd(rayTan, -impactSize).mulAdd(camera.up, -impactSize);
+				shapeRenderer.color(Color.WHITE);
+				shapeRenderer.texCoord(1, 1);
+				shapeRenderer.vertex(rayPos.x, rayPos.y, rayPos.z);
+				
+				
+				
+				shapeRenderer.end();
+			}
 			
-			rayPos.set(rayEnd).mulAdd(rayTan, -rayWidth).mulAdd(camera.up, impactSize);
-			shapeRenderer.color(Color.WHITE);
-			shapeRenderer.texCoord(1, 0);
-			shapeRenderer.vertex(rayPos.x, rayPos.y, rayPos.z);
-			
-			rayPos.set(rayEnd).mulAdd(rayTan, rayWidth).mulAdd(camera.up, -impactSize);
-			shapeRenderer.color(Color.WHITE);
-			shapeRenderer.texCoord(0, 1);
-			shapeRenderer.vertex(rayPos.x, rayPos.y, rayPos.z);
-			
-			rayPos.set(rayEnd).mulAdd(rayTan, -rayWidth).mulAdd(camera.up, -impactSize);
-			shapeRenderer.color(Color.WHITE);
-			shapeRenderer.texCoord(1, 1);
-			shapeRenderer.vertex(rayPos.x, rayPos.y, rayPos.z);
-			
-			
-			
-			shapeRenderer.end();
 		}
 	}
 	
