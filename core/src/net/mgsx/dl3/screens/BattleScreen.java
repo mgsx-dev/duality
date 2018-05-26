@@ -7,7 +7,9 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -18,6 +20,7 @@ import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Intersector;
@@ -30,6 +33,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.ScreenUtils;
 
 import net.mgsx.dl3.model.Mob;
 
@@ -40,7 +44,7 @@ public class BattleScreen extends ScreenAdapter
 	private Array<ModelInstance> models = new Array<ModelInstance>();
 	private float time;
 	private Vector3 cameraPosition = new Vector3();
-	private Environment env;
+	private Environment env, envCollisions;
 	private Model levelModel;
 	private ModelInstance bossModel;
 	private AnimationController bossAnimator;
@@ -55,6 +59,9 @@ public class BattleScreen extends ScreenAdapter
 	private Vector3 rayPos = new Vector3();
 	private ShaderProgram beamShader;
 	private Vector3 intersection = new Vector3();
+	
+	private FrameBuffer fboCollisions;
+	private ModelBatch batchCollisions;
 	
 	public BattleScreen() {
 		camera = new PerspectiveCamera(60f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -92,6 +99,15 @@ public class BattleScreen extends ScreenAdapter
 		beamShader = new ShaderProgram(Gdx.files.internal("shaders/beam.vs"), Gdx.files.internal("shaders/beam.fs"));
 		if(!beamShader.isCompiled()) throw new GdxRuntimeException(beamShader.getLog());
 		shapeRenderer = new ImmediateModeRenderer20(4, false, true, 1, beamShader);
+		
+		int width = Gdx.graphics.getBackBufferWidth();
+		int height = Gdx.graphics.getBackBufferHeight();
+		fboCollisions = new FrameBuffer(Format.RGBA8888, width, height, true);
+		
+		batchCollisions = new ModelBatch();
+		
+		envCollisions = new Environment();
+		envCollisions.add(new DirectionalLight().set(Color.BLACK, Vector3.Y));
 	}
 	
 	private Action emit(final String emitterID, final String emittedID) 
@@ -142,6 +158,19 @@ public class BattleScreen extends ScreenAdapter
 			}
 		};
 		return action;
+	}
+	
+	private void setColorCode(Material mat, int colorCode){
+		ColorAttribute diffuse = mat.get(ColorAttribute.class, ColorAttribute.Diffuse);
+		if(!mat.has(ColorAttribute.Emissive)) mat.set(new ColorAttribute(ColorAttribute.Emissive, diffuse.color));
+		else mat.get(ColorAttribute.class, ColorAttribute.Emissive).color.set(diffuse.color);
+		diffuse.color.set(colorCode);
+	}
+	private void restoreColors(Material mat){
+		ColorAttribute diffuse = mat.get(ColorAttribute.class, ColorAttribute.Diffuse);
+		ColorAttribute emissive = mat.get(ColorAttribute.class, ColorAttribute.Emissive);
+		diffuse.color.set(emissive.color);
+		emissive.color.set(Color.BLACK);
 	}
 	
 	@Override
@@ -229,6 +258,34 @@ public class BattleScreen extends ScreenAdapter
 		Gdx.gl.glClearColor(lum, lum, lum, 0);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
+		
+		// TODO use a special shader instead (bones and all but use only emissive as color code and give back depth)
+		Material matActive = models.first().getMaterial("Active");
+		setColorCode(matActive, 512);
+		Material matBody = models.first().getMaterial("Boss");
+		setColorCode(matBody, 256);
+		
+		fboCollisions.begin();
+
+		Gdx.gl.glClearColor(0, 0, 0, 0);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		
+		batch.begin(camera);
+		batch.render(models);
+		batch.end();
+		
+		byte[] bytes = ScreenUtils.getFrameBufferPixels(Gdx.input.getX(), Gdx.graphics.getBackBufferHeight() - Gdx.input.getY(), 1, 1, false);
+		if(Gdx.input.isTouched()){
+			int code = bytes[2] & 0xFF; // ((bytes[0] & 0xFF) << 24) | ((bytes[1] & 0xFF) << 16) | ((bytes[2] & 0xFF) << 8) | (bytes[3] & 0xFF);
+			System.out.println(code);
+		}
+		
+		fboCollisions.end();
+		
+		// restore emissive
+		restoreColors(matActive);
+		restoreColors(matBody);
+		
 		batch.begin(camera);
 		batch.render(models, env);
 		for(Mob mob : mobs){
