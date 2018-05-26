@@ -44,7 +44,7 @@ public class BattleScreen extends ScreenAdapter
 	private Array<ModelInstance> models = new Array<ModelInstance>();
 	private float time;
 	private Vector3 cameraPosition = new Vector3();
-	private Environment env, envCollisions;
+	private Environment env, colEnv;
 	private Model levelModel;
 	private ModelInstance bossModel;
 	private AnimationController bossAnimator;
@@ -104,10 +104,10 @@ public class BattleScreen extends ScreenAdapter
 		int height = Gdx.graphics.getBackBufferHeight();
 		fboCollisions = new FrameBuffer(Format.RGBA8888, width, height, true);
 		
-		batchCollisions = new ModelBatch();
+		batchCollisions = new ModelBatch(Gdx.files.internal("shaders/collision.vs"), Gdx.files.internal("shaders/collision.fs"));
 		
-		envCollisions = new Environment();
-		envCollisions.add(new DirectionalLight().set(Color.BLACK, Vector3.Y));
+		colEnv = new Environment();
+		colEnv.set(new ColorAttribute(ColorAttribute.Fog, Color.BLUE));
 	}
 	
 	private Action emit(final String emitterID, final String emittedID) 
@@ -160,17 +160,20 @@ public class BattleScreen extends ScreenAdapter
 		return action;
 	}
 	
+	// TODO set once
 	private void setColorCode(Material mat, int colorCode){
-		ColorAttribute diffuse = mat.get(ColorAttribute.class, ColorAttribute.Diffuse);
-		if(!mat.has(ColorAttribute.Emissive)) mat.set(new ColorAttribute(ColorAttribute.Emissive, diffuse.color));
-		else mat.get(ColorAttribute.class, ColorAttribute.Emissive).color.set(diffuse.color);
-		diffuse.color.set(colorCode);
+//		ColorAttribute diffuse = mat.get(ColorAttribute.class, ColorAttribute.Diffuse);
+		if(!mat.has(ColorAttribute.Emissive)){
+			mat.set(new ColorAttribute(ColorAttribute.Emissive, new Color(colorCode)));
+		}else{
+			mat.get(ColorAttribute.class, ColorAttribute.Emissive).color.set(colorCode);
+		}
 	}
 	private void restoreColors(Material mat){
-		ColorAttribute diffuse = mat.get(ColorAttribute.class, ColorAttribute.Diffuse);
-		ColorAttribute emissive = mat.get(ColorAttribute.class, ColorAttribute.Emissive);
-		diffuse.color.set(emissive.color);
-		emissive.color.set(Color.BLACK);
+//		ColorAttribute diffuse = mat.get(ColorAttribute.class, ColorAttribute.Diffuse);
+//		ColorAttribute emissive = mat.get(ColorAttribute.class, ColorAttribute.Emissive);
+//		diffuse.color.set(emissive.color);
+//		emissive.color.set(Color.BLACK);
 	}
 	
 	@Override
@@ -270,14 +273,25 @@ public class BattleScreen extends ScreenAdapter
 		Gdx.gl.glClearColor(0, 0, 0, 0);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		
-		batch.begin(camera);
-		batch.render(models);
-		batch.end();
+		// TODO linked to shader (hard coded)
+		camera.near = 1f;
+		camera.far = 100f;
+		camera.update();
+		
+		batchCollisions.begin(camera);
+		batchCollisions.render(models, colEnv);
+		batchCollisions.end();
 		
 		byte[] bytes = ScreenUtils.getFrameBufferPixels(Gdx.input.getX(), Gdx.graphics.getBackBufferHeight() - Gdx.input.getY(), 1, 1, false);
 		if(Gdx.input.isTouched()){
 			int code = bytes[2] & 0xFF; // ((bytes[0] & 0xFF) << 24) | ((bytes[1] & 0xFF) << 16) | ((bytes[2] & 0xFF) << 8) | (bytes[3] & 0xFF);
+			int fog = bytes[3] & 0xFF;
+			if(fog > 0){
+				float frustrumDistance = MathUtils.lerp(camera.near, camera.far, (fog / 255f));
+				rayLen = frustrumDistance;
+			}
 			System.out.println(code);
+			// System.out.println()); 
 		}
 		
 		fboCollisions.end();
@@ -334,6 +348,33 @@ public class BattleScreen extends ScreenAdapter
 			shapeRenderer.color(Color.WHITE);
 			shapeRenderer.texCoord(1, rayLen);
 			shapeRenderer.vertex(rayPos.x, rayPos.y, rayPos.z);
+			
+			
+			shapeRenderer.end();
+			
+			float impactSize = .3f;
+			shapeRenderer.begin(camera.combined, GL20.GL_TRIANGLE_STRIP);
+			
+			rayPos.set(rayEnd).mulAdd(rayTan, rayWidth).mulAdd(camera.up, impactSize);
+			shapeRenderer.color(Color.WHITE);
+			shapeRenderer.texCoord(0, 0);
+			shapeRenderer.vertex(rayPos.x, rayPos.y, rayPos.z);
+			
+			rayPos.set(rayEnd).mulAdd(rayTan, -rayWidth).mulAdd(camera.up, impactSize);
+			shapeRenderer.color(Color.WHITE);
+			shapeRenderer.texCoord(1, 0);
+			shapeRenderer.vertex(rayPos.x, rayPos.y, rayPos.z);
+			
+			rayPos.set(rayEnd).mulAdd(rayTan, rayWidth).mulAdd(camera.up, -impactSize);
+			shapeRenderer.color(Color.WHITE);
+			shapeRenderer.texCoord(0, 1);
+			shapeRenderer.vertex(rayPos.x, rayPos.y, rayPos.z);
+			
+			rayPos.set(rayEnd).mulAdd(rayTan, -rayWidth).mulAdd(camera.up, -impactSize);
+			shapeRenderer.color(Color.WHITE);
+			shapeRenderer.texCoord(1, 1);
+			shapeRenderer.vertex(rayPos.x, rayPos.y, rayPos.z);
+			
 			
 			
 			shapeRenderer.end();
