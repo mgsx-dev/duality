@@ -22,6 +22,14 @@ eclipse.project {
     name = appName + "-assets"
 }
 
+task buildAssets(group: 'gdx'){}
+
+def level1FBX = blenderExportFBX("src/level1.blend", "$buildDir/blender/level1.fbx")
+def level1G3D = fbxConvTask("build/blender/level1.fbx", "../android/assets/level1.g3dj")
+level1G3D.dependsOn << level1FBX
+buildAssets.dependsOn << level1G3D
+
+
 
 /** usage example :
 
