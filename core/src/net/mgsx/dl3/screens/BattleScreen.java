@@ -37,6 +37,10 @@ import net.mgsx.dl3.utils.Impact;
 
 abstract public class BattleScreen extends ScreenAdapter
 {
+	public static final float MOB_ENERGY = .5f; // energy in seconds of beam
+	public static final float PART_ENERGY = 1f; // energy in seconds of beam
+	public static final float BOSS_ENERGY = 10f; // energy in seconds of beam
+	
 	private Camera camera;
 	private ModelBatch batch;
 	protected Array<ModelInstance> models = new Array<ModelInstance>();
@@ -132,6 +136,8 @@ abstract public class BattleScreen extends ScreenAdapter
 				mob.direction.set(Vector3.Y).rot(emitter.globalTransform);
 				mob.id = collisionSystem.attachEntity(model);
 				mob.light = light;
+				mob.energyMax = mob.energy = MOB_ENERGY;
+				mob.material = model.getMaterial("Boss");
 				mobs.add(mob);
 			}
 		});
@@ -282,7 +288,9 @@ abstract public class BattleScreen extends ScreenAdapter
 			for(Mob mob : mobs){
 				if(mob.id == impact.id){
 					if(lightRay != mob.light){
-						mob.alive = false; // TODO energy
+						mob.energy -= delta;
+						mob.alive = mob.energy > 0;
+						lastColor = mob.material.get(ColorAttribute.class, ColorAttribute.Diffuse);
 					}
 				}
 			}
@@ -295,7 +303,7 @@ abstract public class BattleScreen extends ScreenAdapter
 						
 						if(enemyPart.light == null){
 							// internal boss : TODO take energy global boss
-							bossLife = MathUtils.clamp(bossLife + (lightRay ? delta : -delta), 0, 1);
+							bossLife = MathUtils.clamp(bossLife + (lightRay ? delta : -delta) / BOSS_ENERGY, 0, 1);
 							lastColor = enemyPart.material.get(ColorAttribute.class, ColorAttribute.Diffuse);
 						}
 						else if(lightRay != enemyPart.light){

@@ -64,7 +64,7 @@ public class Level2Screen extends BattleScreen
 		part.node = boneID == null ? null : bossModel.getNode(boneID, true);
 		part.material = bossModel.getMaterial(materialID);
 		part.id = collisionSystem.attachEntity(bossModel, materialID);
-		part.energy = part.energyMax = 1; // energy in seconds of beam
+		part.energy = part.energyMax = PART_ENERGY;
 		part.light = light;
 		enemyParts.add(part);
 		return part;
