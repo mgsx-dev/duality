@@ -29,12 +29,9 @@ task dist(type: Jar) {
     from files(sourceSets.main.output.resourcesDir)
     from {configurations.compile.collect {zipTree(it)}}
     from files(project.assetsDir);
- 	
- 	// additional files could be added like this :
- 	// from file("$projectDir/LICENSE");
+    from file("$projectDir/LICENSE");
     
-    // final JAR basename could be modified like this (default is project name) :
- 	// baseName = "my-custom-game-name"
+ 	baseName = appName + "-desktop"
 
     manifest {
         attributes 'Main-Class': project.mainClassName
