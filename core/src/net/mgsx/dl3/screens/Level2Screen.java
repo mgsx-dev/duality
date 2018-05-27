@@ -119,12 +119,10 @@ public class Level2Screen extends BattleScreen
 		Actor actor = emitActor;
 		emitCount++;
 		if(emitCount % 2 == 0){
-			// actor.addAction(Actions.delay(MathUtils.lerp(0f, 4, bossLife)));
+			actor.addAction(Actions.delay(MathUtils.lerp(0f, 4, bossLife)));
 		}
 		
 		int rnd = MathUtils.random(3);
-		// rnd = 2;
-		// rnd = 0;
 		switch(rnd){
 		case 1:
 			sequenceBackLeft(actor);

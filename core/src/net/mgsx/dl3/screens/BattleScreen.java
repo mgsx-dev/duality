@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
@@ -94,6 +95,7 @@ abstract public class BattleScreen extends ScreenAdapter
 	
 	private Vector3 cameraTan = new Vector3();
 	public float playerCharge;
+	private PointLight pointLight;
 	
 	public BattleScreen(String modelFile) 
 	{
@@ -126,6 +128,7 @@ abstract public class BattleScreen extends ScreenAdapter
 		env = new Environment();
 		env.add(directionalLight = new DirectionalLight().set(Color.WHITE, new Vector3(1, -5, 1).nor()));
 		env.set(ambientLight = new ColorAttribute(ColorAttribute.AmbientLight, new Color(Color.WHITE).mul(.4f)));
+		env.add(pointLight = new PointLight().set(Color.WHITE, new Vector3(0, 2, 0), 0));
 		
 		beamShaderLight = new ShaderProgram(Gdx.files.internal("shaders/beam.vs"), Gdx.files.internal("shaders/beam.fs"));
 		if(!beamShaderLight.isCompiled()) throw new GdxRuntimeException(beamShaderLight.getLog());
@@ -443,15 +446,20 @@ abstract public class BattleScreen extends ScreenAdapter
 			}
 		}
 		
-		float lumRate = MathUtils.lerp(0.3f, 0.6f, bossLife);
+		float baseLerp = bossLife;
 		
-		directionalLight.color.set(Color.WHITE).mul(lumRate);
+		float lumRate = MathUtils.lerp(0.7f, 0.4f, baseLerp);
+		
+		directionalLight.color.set(Color.WHITE).mul(lumRate * lumRate * 1);
 		ambientLight.color.set(Color.WHITE).mul(1.0f - lumRate);
 		
 		float lum = lumRate;
 		Gdx.gl.glClearColor(lum, lum * 1.1f, lum * 1.2f, 0);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
+		pointLight.intensity = 500; // MathUtils.lerp(20, 10, bossLife * bossLife * bossLife);
+		pointLight.position.y = MathUtils.lerp(10, 300, baseLerp * baseLerp);
+		
 		if(lastColor != null){
 			lastColor.color.set(colorBackup);
 			lastColor = null;

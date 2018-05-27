@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1024"
+   height="768"
+   viewBox="0 0 1024 768.00001"
+   id="svg4225"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="title-gameplay.svg"
+   inkscape:export-filename="/home/germain/git/dl-gamejam-3/assets/art/title-gameplay.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4227">
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow2Lend"
+       style="overflow:visible;"
+       inkscape:isstock="true">
+      <path
+         id="path5724"
+         style="fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round;stroke:#db9c14;stroke-opacity:0.96019897;fill:#db9c14;fill-opacity:0.96019897"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z "
+         transform="scale(1.1) rotate(180) translate(1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lend"
+       style="overflow:visible;"
+       inkscape:isstock="true">
+      <path
+         id="path5706"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1;fill:#000000;fill-opacity:1"
+         transform="scale(0.8) rotate(180) translate(12.5,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-3"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5724-9"
+         style="fill:#db5b14;fill-opacity:0.96019897;fill-rule:evenodd;stroke:#db5b14;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:0.96019897"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-3-6"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5724-9-9"
+         style="fill:#db2614;fill-opacity:0.96019897;fill-rule:evenodd;stroke:#db2614;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:0.96019897"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="450.53259"
+     inkscape:cy="401.92311"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1855"
+     inkscape:window-height="1056"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata4230">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Layer 2"
+     sodipodi:insensitive="true">
+    <image
+       sodipodi:absref="/home/germain/git/dl-gamejam-3/assets/art/title-1024x768.png"
+       xlink:href="title-1024x768.png"
+       width="1024"
+       height="768"
+       preserveAspectRatio="none"
+       id="image5525"
+       x="0"
+       y="-1.1368684e-13" />
+  </g>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-284.36216)">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:61.65413666px;line-height:125%;font-family:'Concert One';-inkscape-font-specification:'Concert One, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#fd0000;fill-opacity:0.5129683;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="718.53949"
+       y="1040.5997"
+       id="text4828"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4830"
+         x="718.53949"
+         y="1040.5997">TENTACULA</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:61.65413666px;line-height:125%;font-family:'Concert One';-inkscape-font-specification:'Concert One, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="785.10376"
+       y="344.33682"
+       id="text4828-2"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4830-1"
+         x="785.10376"
+         y="344.33682">DUALITY</tspan><tspan
+         sodipodi:role="line"
+         x="785.10376"
+         y="421.40448"
+         id="tspan4850" /><tspan
+         sodipodi:role="line"
+         x="785.10376"
+         y="498.47214"
+         id="tspan4854" /></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:28.32199669px;line-height:125%;font-family:'Concert One';-inkscape-font-specification:'Concert One, Normal';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#8f8f8f;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       x="826.146"
+       y="357.49908"
+       id="text4858"
+       sodipodi:linespacing="125%"
+       transform="scale(0.9559099,1.0461237)"><tspan
+         sodipodi:role="line"
+         x="826.146"
+         y="357.49908"
+         id="tspan4862">LibGDX Jam #3</tspan></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:61.65413666px;line-height:125%;font-family:'Concert One';-inkscape-font-specification:'Concert One, Normal';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#515151;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       x="868.14783"
+       y="980.86127"
+       id="text4886"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4888"
+         x="868.14783"
+         y="980.86127">demo</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:61.65413666px;line-height:125%;font-family:'Concert One';-inkscape-font-specification:'Concert One, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#d69916;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
+       x="15.103016"
+       y="771.2793"
+       id="text4828-2-6"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4830-1-4"
+         x="15.103016"
+         y="771.2793">Weak points</tspan><tspan
+         sodipodi:role="line"
+         x="15.103016"
+         y="848.34698"
+         id="tspan5554" /><tspan
+         sodipodi:role="line"
+         x="15.103016"
+         y="925.41461"
+         id="tspan4850-6" /><tspan
+         sodipodi:role="line"
+         x="15.103016"
+         y="1002.4823"
+         id="tspan4854-2" /></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:38.84557343px;line-height:125%;font-family:'Concert One';-inkscape-font-specification:'Concert One, Normal';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       x="22.108902"
+       y="335.72449"
+       id="text5558"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="22.108902"
+         y="335.72449"
+         id="tspan5562">Light Beam vs Dark Things</tspan><tspan
+         sodipodi:role="line"
+         x="22.108902"
+         y="384.28146"
+         id="tspan5578" /><tspan
+         sodipodi:role="line"
+         x="22.108902"
+         y="432.83841"
+         id="tspan5574" /><tspan
+         sodipodi:role="line"
+         x="22.108902"
+         y="481.39542"
+         id="tspan5564" /></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:32.96832275px;line-height:125%;font-family:'Concert One';-inkscape-font-specification:'Concert One, Normal';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:0.44278606;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       x="21.283661"
+       y="366.07544"
+       id="text5580"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan5582"
+         x="21.283661"
+         y="366.07544">Mouse LEFT Button</tspan></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:38.84557343px;line-height:125%;font-family:'Concert One';-inkscape-font-specification:'Concert One, Normal';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       x="23.017307"
+       y="421.49435"
+       id="text5558-5"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="23.017307"
+         y="421.49435"
+         id="tspan5562-8">Dark Beam vs Light things</tspan><tspan
+         sodipodi:role="line"
+         x="23.017307"
+         y="470.0513"
+         id="tspan5578-6" /><tspan
+         sodipodi:role="line"
+         x="23.017307"
+         y="518.60828"
+         id="tspan5574-2" /><tspan
+         sodipodi:role="line"
+         x="23.017307"
+         y="567.16522"
+         id="tspan5564-8" /></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:30.07950401px;line-height:125%;font-family:'Concert One';-inkscape-font-specification:'Concert One, Normal';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:0.44278606;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       x="22.412132"
+       y="449.83615"
+       id="text5580-4"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan5582-7"
+         x="22.412132"
+         y="449.83615">Mouse RIGHT Button</tspan></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:61.65413666px;line-height:125%;font-family:'Concert One';-inkscape-font-specification:'Concert One, Normal';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#d85c15;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       x="15.152297"
+       y="892.75806"
+       id="text5657"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan5659"
+         x="15.152297"
+         y="892.75806">Dark weapon</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#db9c14;stroke-width:5.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.96019897;marker-end:url(#Arrow2Lend)"
+       d="m 560.63466,473.54475 64.64977,-27.27412"
+       id="path5697"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#db9c14;stroke-width:24.39999962;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.96019897"
+       d="m 366.68537,752.34685 c 0,0 96.97465,3.03046 143.44167,-184.85791 20.12154,-81.36101 72.73098,-105.05587 72.73098,-105.05587"
+       id="path7145"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="csc" />
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:61.65413666px;line-height:125%;font-family:'Concert One';-inkscape-font-specification:'Concert One, Normal';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#dc2c1a;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       x="13.516177"
+       y="990.64282"
+       id="text5657-4"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan5659-0"
+         x="13.516177"
+         y="990.64282">Light weapon</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#db5b14;stroke-width:5.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.960199;marker-end:url(#Arrow2Lend-3)"
+       d="m 575.72689,765.32632 45.45687,-42.42641"
+       id="path5697-1"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#db5b14;stroke-width:24.39999962;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.96019897"
+       d="m 363.59486,878.46337 c 0,0 82.54298,13.73953 142.43151,-34.34515 56.56777,-45.41844 77.78174,-84.85282 77.78174,-84.85282"
+       id="path7145-9"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="csc" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#db2614;stroke-width:5.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.960199;marker-end:url(#Arrow2Lend-3-6)"
+       d="m 662.20746,885.06785 45.45687,-48.48733"
+       id="path5697-1-3"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#db2614;stroke-width:24.39999962;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.96019897"
+       d="m 386.43582,976.99169 c 0,0 133.05062,11.71923 206.07112,-19.19286 66.8052,-28.28094 81.82235,-90.91374 81.82235,-90.91374"
+       id="path7145-9-3"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="csc" />
+  </g>
+</svg>
