@@ -435,12 +435,12 @@ abstract public class BattleScreen extends ScreenAdapter
 			ray.getEndPoint(rayEnd, rayLen);
 			
 			rayTan.set(camera.direction).crs(camera.up).nor();
-			rayStart.set(camera.position);
+			rayStart.set(camera.position).mulAdd(camera.direction, camera.near);
 			
 			float rayBias = 1f;
 			//rayStart.mulAdd(rayTan, rayBias);
 			// rayStart.mulAdd(camera.up, -rayBias);
-			rayStart.y -= 1f;
+			rayStart.y -= 1.5f;
 			
 			Gdx.gl.glEnable(GL20.GL_BLEND);
 			
@@ -456,7 +456,7 @@ abstract public class BattleScreen extends ScreenAdapter
 			
 			shapeRenderer.begin(camera.combined, GL20.GL_TRIANGLE_STRIP);
 			shapeRenderer.setShader(beamShader);
-			float rayWidth = 1f;
+			float rayWidth = .3f;
 			
 			rayPos.set(rayStart).mulAdd(rayTan, rayWidth);
 			shapeRenderer.color(Color.WHITE);
