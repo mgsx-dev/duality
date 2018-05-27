@@ -14,5 +14,5 @@ public class EnemyPart {
 	public float energyMax;
 	public float time;
 	public Vector3 direction;
-	public boolean light;
+	public Boolean light;
 }

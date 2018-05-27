@@ -39,11 +39,11 @@ abstract public class BattleScreen extends ScreenAdapter
 {
 	private Camera camera;
 	private ModelBatch batch;
-	private Array<ModelInstance> models = new Array<ModelInstance>();
+	protected Array<ModelInstance> models = new Array<ModelInstance>();
 	private float time;
 	private Vector3 cameraPosition = new Vector3();
 	private Environment env;
-	private Model levelModel;
+	protected Model levelModel;
 	protected ModelInstance bossModel;
 	protected AnimationController bossAnimator;
 	protected Actor bossActor;
@@ -62,12 +62,16 @@ abstract public class BattleScreen extends ScreenAdapter
 	private boolean pause;
 	private boolean touched;
 	
+	protected float bossLife = 1;
+	
 	private Array<EnemyPart> detachedParts = new Array<EnemyPart>();
 	
 	protected CollisionSystem collisionSystem;
 	private int bossID;
 	
 	protected Array<EnemyPart> enemyParts = new Array<EnemyPart>();
+	private DirectionalLight directionalLight;
+	private ColorAttribute ambientLight;
 	
 	public BattleScreen(String modelFile) {
 		camera = new PerspectiveCamera(60f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -89,8 +93,8 @@ abstract public class BattleScreen extends ScreenAdapter
 		bossActor = new Actor();
 		
 		env = new Environment();
-		env.add(new DirectionalLight().set(Color.WHITE, new Vector3(1, -3, 1).nor()));
-		env.set(new ColorAttribute(ColorAttribute.AmbientLight, new Color(Color.WHITE).mul(.5f)));
+		env.add(directionalLight = new DirectionalLight().set(Color.WHITE, new Vector3(1, -5, 1).nor()));
+		env.set(ambientLight = new ColorAttribute(ColorAttribute.AmbientLight, new Color(Color.WHITE).mul(.4f)));
 		
 		beamShaderLight = new ShaderProgram(Gdx.files.internal("shaders/beam.vs"), Gdx.files.internal("shaders/beam.fs"));
 		if(!beamShaderLight.isCompiled()) throw new GdxRuntimeException(beamShaderLight.getLog());
@@ -258,8 +262,11 @@ abstract public class BattleScreen extends ScreenAdapter
 			}
 		}
 		
-		float lum = .3f;
-		Gdx.gl.glClearColor(lum, lum, lum, 0);
+		directionalLight.color.set(Color.WHITE).mul(bossLife);
+		ambientLight.color.set(Color.WHITE).mul(1.0f - bossLife);
+		
+		float lum = bossLife;
+		Gdx.gl.glClearColor(lum, lum * 1.1f, lum * 1.2f, 0);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
 		if(lastColor != null){
@@ -286,7 +293,12 @@ abstract public class BattleScreen extends ScreenAdapter
 				for(EnemyPart enemyPart : enemyParts){
 					if(impact.id == enemyPart.id){
 						
-						if(lightRay != enemyPart.light){
+						if(enemyPart.light == null){
+							// internal boss : TODO take energy global boss
+							bossLife = MathUtils.clamp(bossLife + (lightRay ? delta : -delta), 0, 1);
+							lastColor = enemyPart.material.get(ColorAttribute.class, ColorAttribute.Diffuse);
+						}
+						else if(lightRay != enemyPart.light){
 							
 							// TODO flash part
 							enemyPart.energy -= delta;
@@ -294,13 +306,15 @@ abstract public class BattleScreen extends ScreenAdapter
 							if(enemyPart.energy <= 0){
 								enemyPart.material.get(ColorAttribute.class, ColorAttribute.Diffuse).color.set(Color.BLACK);
 								// emit1Part.node.detach();
-								enemyPart.node.isAnimated = false;
+								if(enemyPart.node != null){
+									enemyPart.node.isAnimated = false;
+								}
 								detachedParts.add(enemyPart);
 							}else{
 								lastColor = enemyPart.material.get(ColorAttribute.class, ColorAttribute.Diffuse);
 							}
 						}else{
-							// TODO give nergy back
+							// TODO give energy back
 						}
 						
 					}
@@ -313,7 +327,7 @@ abstract public class BattleScreen extends ScreenAdapter
 			colorBackup.set(lastColor.color);
 			float freq = 20;
 			if((time * freq) % 2f > 1)
-				lastColor.color.set(Color.WHITE);
+				lastColor.color.set(Color.BLACK);
 		}
 		
 		
@@ -321,20 +335,22 @@ abstract public class BattleScreen extends ScreenAdapter
 		for(int i=0 ; i<detachedParts.size ; )
 		{
 			EnemyPart part = detachedParts.get(i);
-			if(part.direction == null){
-				part.direction = new Vector3(part.node.translation).nor();
+			if(part.node != null){
+				if(part.direction == null){
+					part.direction = new Vector3(part.node.translation).nor();
+				}
+				part.node.translation.mulAdd(part.direction, delta * 1f);
+				part.node.translation.y -= part.time * .003f;
+				part.node.isAnimated = false;
+				part.time += delta;
+				if(part.node.translation.y < 0 || part.time > 30){
+					part.node.detach();
+					// part.model.nodes.removeValue(part.node, true);
+					detachedParts.removeIndex(i);
+					continue;
+				}
 			}
-			part.node.translation.mulAdd(part.direction, delta * 1f);
-			part.node.translation.y -= part.time * .003f;
-			part.node.isAnimated = false;
-			part.time += delta;
-			if(part.node.translation.y < 0 || part.time > 30){
-				part.node.detach();
-				// part.model.nodes.removeValue(part.node, true);
-				detachedParts.removeIndex(i);
-			}else{
-				i++;
-			}
+			i++;
 		}
 		
 		
