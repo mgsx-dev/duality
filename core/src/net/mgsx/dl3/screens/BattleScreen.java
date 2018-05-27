@@ -42,7 +42,7 @@ import net.mgsx.dl3.utils.Impact;
 
 abstract public class BattleScreen extends ScreenAdapter
 {
-	public static final float MOB_ENERGY = .5f; // energy in seconds of beam
+	public static final float MOB_ENERGY = .2f; // energy in seconds of beam
 	public static final float PART_ENERGY = 1f; // energy in seconds of beam
 	public static final float BOSS_ENERGY = 10f; // energy in seconds of beam
 	public static final float PLAYER_ENERGY = 10f; // energy in seconds of beam
@@ -204,6 +204,123 @@ abstract public class BattleScreen extends ScreenAdapter
 			@Override
 			public boolean act(float delta) {
 				if(animation == null){
+					animation = animator.animate(id, 1, speed, listener, 1f); // XXX global transition
+				}
+				return end;
+			}
+		};
+		return action;
+	}
+	protected Action direct(final AnimationController animator, String nodeNameID, String animationID, final float speed){
+		final String id = nodeNameID + "|" + animationID;
+		Action action = new Action() {
+			private AnimationDesc animation;
+			private boolean end;
+			private AnimationListener listener = new AnimationListener() {
+				
+				@Override
+				public void onLoop(AnimationDesc animation) {
+				}
+				
+				@Override
+				public void onEnd(AnimationDesc animation) {
+					end = true;
+				}
+			};
+			@Override
+			public void restart() {
+				animation = null;
+				end = false;
+			}
+			@Override
+			public boolean act(float delta) {
+				if(animation == null){
+					animation = animator.setAnimation(id, 1, speed, listener); 
+					animator.target.transform.rotate(Vector3.Y, 60);
+				}
+				return end;
+			}
+		};
+		return action;
+	}
+	
+	protected Action turn(final AnimationController animator, String nodeNameID, String animationID, final float speed){
+		final String id = nodeNameID + "|" + animationID;
+		Action action = new Action() {
+			private AnimationDesc animation;
+			private boolean end;
+			private AnimationListener listener = new AnimationListener() {
+				
+				@Override
+				public void onLoop(AnimationDesc animation) {
+				}
+				
+				@Override
+				public void onEnd(AnimationDesc animation) {
+					end = true;
+				}
+			};
+			@Override
+			public void restart() {
+				animation = null;
+				end = false;
+			}
+			@Override
+			public boolean act(float delta) {
+				if(animation == null){
+					animation = animator.setAnimation(id, 1, speed, listener); 
+					animator.target.transform.rotate(Vector3.Y, 60);
+				}
+				return end;
+			}
+		};
+		return action;
+	}
+	
+	protected Action pose(final AnimationController animator, String nodeNameID, String animationID){
+		final String id = nodeNameID + "|" + animationID;
+		Action action = new Action() {
+			private AnimationDesc animation;
+			@Override
+			public void restart() {
+				animation = null;
+			}
+			@Override
+			public boolean act(float delta) {
+				if(animation == null){
+					animation = animator.animate(id, 1);
+					animation.duration = 0; 
+				}
+				return true;
+			}
+		};
+		return action;
+	}
+
+	protected Action action(final AnimationController animator, String nodeNameID, String animationID, final float speed){
+		final String id = nodeNameID + "|" + animationID;
+		Action action = new Action() {
+			private AnimationDesc animation;
+			private boolean end;
+			private AnimationListener listener = new AnimationListener() {
+				
+				@Override
+				public void onLoop(AnimationDesc animation) {
+				}
+				
+				@Override
+				public void onEnd(AnimationDesc animation) {
+					end = true;
+				}
+			};
+			@Override
+			public void restart() {
+				animation = null;
+				end = false;
+			}
+			@Override
+			public boolean act(float delta) {
+				if(animation == null){
 					animation = animator.action(id, 1, speed, listener, 0);
 				}
 				return end;
@@ -211,6 +328,7 @@ abstract public class BattleScreen extends ScreenAdapter
 		};
 		return action;
 	}
+	
 	
 	@Override
 	public void render(float delta) 
@@ -222,7 +340,8 @@ abstract public class BattleScreen extends ScreenAdapter
 			return;
 		}
 		
-		stage.act();
+		((PerspectiveCamera)camera).fieldOfView = 60f;
+		
 		
 		touched = Gdx.input.isTouched();
 		
@@ -239,14 +358,14 @@ abstract public class BattleScreen extends ScreenAdapter
 		else if(isRight()){
 			cameraAngle += delta * camAngleSpeed;
 		}
-		// XXX cameraAngle = time * 10f;
+		cameraAngle = time * 5f + 90;
 		
 		traumaRate = Math.min(1, MathUtils.lerp(traumaRate, 0, delta * 4));
 		float trauma = traumaRate * traumaRate;
 		
 		cameraPosition.x = MathUtils.cosDeg(cameraAngle) * cameraDistance;
 		cameraPosition.z = MathUtils.sinDeg(cameraAngle) * cameraDistance;
-		cameraPosition.y = 2;
+		cameraPosition.y = 2 + ( MathUtils.sinDeg(time * 14) + 1) * 3 ;
 		
 		camera.position.set(cameraPosition);
 		
@@ -284,9 +403,12 @@ abstract public class BattleScreen extends ScreenAdapter
 //			}
 		}
 		
+		stage.act();
+		
 		bossActor.act(delta);
 		
 		bossAnimator.update(delta);
+		
 		
 		for(Mob mob : mobs){
 			
@@ -303,8 +425,8 @@ abstract public class BattleScreen extends ScreenAdapter
 			}
 			
 			mob.deltaCam.scl(1f / camDistance);
-			if(mob.time > 1)
-			mob.direction.slerp(mob.deltaCam, delta * 5f);
+			if(mob.time > .2f)
+				mob.direction.slerp(mob.deltaCam, delta * 3f);
 			mob.position.mulAdd(mob.direction, delta * speed);
 			
 			if(mob.position.len() > 20) mob.alive = false;
@@ -321,10 +443,12 @@ abstract public class BattleScreen extends ScreenAdapter
 			}
 		}
 		
-		directionalLight.color.set(Color.WHITE).mul(bossLife);
-		ambientLight.color.set(Color.WHITE).mul(1.0f - bossLife);
+		float lumRate = MathUtils.lerp(0.3f, 0.6f, bossLife);
 		
-		float lum = bossLife;
+		directionalLight.color.set(Color.WHITE).mul(lumRate);
+		ambientLight.color.set(Color.WHITE).mul(1.0f - lumRate);
+		
+		float lum = lumRate;
 		Gdx.gl.glClearColor(lum, lum * 1.1f, lum * 1.2f, 0);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
@@ -374,7 +498,7 @@ abstract public class BattleScreen extends ScreenAdapter
 								enemyPart.material.get(ColorAttribute.class, ColorAttribute.Diffuse).color.set(Color.BLACK);
 								// emit1Part.node.detach();
 								if(enemyPart.node != null){
-									enemyPart.node.isAnimated = false;
+									// enemyPart.node.isAnimated = false;
 								}
 								detachedParts.add(enemyPart);
 								enemyPart.alive = false;
@@ -401,26 +525,26 @@ abstract public class BattleScreen extends ScreenAdapter
 		
 		
 		// update detached parts
-		for(int i=0 ; i<detachedParts.size ; )
-		{
-			EnemyPart part = detachedParts.get(i);
-			if(part.node != null){
-				if(part.direction == null){
-					part.direction = new Vector3(part.node.translation).nor();
-				}
-				part.node.translation.mulAdd(part.direction, delta * 1f);
-				part.node.translation.y -= part.time * .003f;
-				part.node.isAnimated = false;
-				part.time += delta;
-				if(part.node.translation.y < 0 || part.time > 30){
-					part.node.detach();
-					// part.model.nodes.removeValue(part.node, true);
-					detachedParts.removeIndex(i);
-					continue;
-				}
-			}
-			i++;
-		}
+//		for(int i=0 ; i<detachedParts.size ; )
+//		{
+//			EnemyPart part = detachedParts.get(i);
+//			if(part.node != null){
+//				if(part.direction == null){
+//					part.direction = new Vector3(part.node.translation).nor();
+//				}
+//				part.node.translation.mulAdd(part.direction, delta * 1f);
+//				part.node.translation.y -= part.time * .003f;
+//				part.node.isAnimated = false;
+//				part.time += delta;
+//				if(part.node.translation.y < 0 || part.time > 30){
+//					//part.node.detach();
+//					// part.model.nodes.removeValue(part.node, true);
+//					detachedParts.removeIndex(i);
+//					continue;
+//				}
+//			}
+//			i++;
+//		}
 		
 		
 		batch.begin(camera);
