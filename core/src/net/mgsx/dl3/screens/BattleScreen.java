@@ -25,13 +25,18 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import net.mgsx.dl3.model.EnemyPart;
 import net.mgsx.dl3.model.Mob;
+import net.mgsx.dl3.ui.GameUI;
 import net.mgsx.dl3.utils.CollisionSystem;
 import net.mgsx.dl3.utils.Impact;
 
@@ -40,6 +45,9 @@ abstract public class BattleScreen extends ScreenAdapter
 	public static final float MOB_ENERGY = .5f; // energy in seconds of beam
 	public static final float PART_ENERGY = 1f; // energy in seconds of beam
 	public static final float BOSS_ENERGY = 10f; // energy in seconds of beam
+	public static final float PLAYER_ENERGY = 10f; // energy in seconds of beam
+	private static final float CHARGE_SPEED = 5f; // energy in seconds of beam
+	private static final float RECOVERY_RATE = 1f / 6f; // rate of life back
 	
 	private Camera camera;
 	private ModelBatch batch;
@@ -66,7 +74,9 @@ abstract public class BattleScreen extends ScreenAdapter
 	private boolean pause;
 	private boolean touched;
 	
-	protected float bossLife = 1;
+	public float playerLife = 1;
+	public float bossLife = 1;
+	public int combo;
 	
 	private Array<EnemyPart> detachedParts = new Array<EnemyPart>();
 	
@@ -77,7 +87,24 @@ abstract public class BattleScreen extends ScreenAdapter
 	private DirectionalLight directionalLight;
 	private ColorAttribute ambientLight;
 	
-	public BattleScreen(String modelFile) {
+	private Stage stage;
+	private Skin skin;
+	
+	private float traumaRate;
+	
+	private Vector3 cameraTan = new Vector3();
+	public float playerCharge;
+	
+	public BattleScreen(String modelFile) 
+	{
+		skin = new Skin(Gdx.files.internal("skins/game-skin.json"));
+		stage = new Stage(new ScreenViewport());
+		GameUI gameUI = new GameUI(this, skin);
+		Table root = new Table();
+		root.setFillParent(true);
+		root.add(gameUI).expand().fill();
+		stage.addActor(root);
+		
 		camera = new PerspectiveCamera(60f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.position.set(2, 2, 2);
 		camera.lookAt(Vector3.Zero);
@@ -118,6 +145,16 @@ abstract public class BattleScreen extends ScreenAdapter
 		
 		collisionSystem.addModel(bossModel);
 		bossID = collisionSystem.attachEntity(bossModel, "Boss");
+	}
+	
+	@Override
+	public void show() {
+		Gdx.input.setInputProcessor(stage);
+	}
+	
+	@Override
+	public void hide() {
+		Gdx.input.setInputProcessor(null);
 	}
 	
 	protected Action emit(final String emitterID, final String emittedID, final boolean light) 
@@ -184,6 +221,9 @@ abstract public class BattleScreen extends ScreenAdapter
 		if(pause){
 			return;
 		}
+		
+		stage.act();
+		
 		touched = Gdx.input.isTouched();
 		
 		boolean lightRay = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
@@ -201,13 +241,22 @@ abstract public class BattleScreen extends ScreenAdapter
 		}
 		// XXX cameraAngle = time * 10f;
 		
+		traumaRate = Math.min(1, MathUtils.lerp(traumaRate, 0, delta * 4));
+		float trauma = traumaRate * traumaRate;
+		
 		cameraPosition.x = MathUtils.cosDeg(cameraAngle) * cameraDistance;
 		cameraPosition.z = MathUtils.sinDeg(cameraAngle) * cameraDistance;
 		cameraPosition.y = 2;
 		
 		camera.position.set(cameraPosition);
+		
 		camera.up.set(Vector3.Y);
 		camera.lookAt(0, 4, 0);
+		camera.update();
+		
+		cameraTan.set(camera.direction).crs(camera.up).nor();
+		camera.rotate(camera.up, MathUtils.sin(time * 100) * 2f * trauma);
+		camera.rotate(cameraTan, MathUtils.cos(time * 100 + 34.4f) * 2f * trauma);
 		camera.update();
 		
 		Ray ray = null; 
@@ -247,7 +296,11 @@ abstract public class BattleScreen extends ScreenAdapter
 			float speed = 3.5f;
 			mob.deltaCam.set(camera.position).sub(mob.position);
 			float camDistance = mob.deltaCam.len();
-			if(camDistance < 1) mob.alive = false;
+			if(camDistance < 1){
+				playerLife -= 1f / PLAYER_ENERGY;
+				traumaRate += 1f;
+				mob.alive = false;
+			}
 			
 			mob.deltaCam.scl(1f / camDistance);
 			if(mob.time > 1)
@@ -289,8 +342,14 @@ abstract public class BattleScreen extends ScreenAdapter
 				if(mob.id == impact.id){
 					if(lightRay != mob.light){
 						mob.energy -= delta;
-						mob.alive = mob.energy > 0;
+						if(mob.energy <= 0 && mob.alive){
+							mob.alive = false;
+							incrementCombo();
+						}
+						incrementCharge(delta);
 						lastColor = mob.material.get(ColorAttribute.class, ColorAttribute.Diffuse);
+					}else{
+						resetCombo();
 					}
 				}
 			}
@@ -302,27 +361,29 @@ abstract public class BattleScreen extends ScreenAdapter
 					if(impact.id == enemyPart.id){
 						
 						if(enemyPart.light == null){
-							// internal boss : TODO take energy global boss
+							// internal boss
 							bossLife = MathUtils.clamp(bossLife + (lightRay ? delta : -delta) / BOSS_ENERGY, 0, 1);
 							lastColor = enemyPart.material.get(ColorAttribute.class, ColorAttribute.Diffuse);
 						}
 						else if(lightRay != enemyPart.light){
+							if(!enemyPart.alive) continue;
 							
-							// TODO flash part
 							enemyPart.energy -= delta;
-							
-							if(enemyPart.energy <= 0){
+							incrementCharge(delta);
+							if(enemyPart.energy <= 0 && enemyPart.alive){
 								enemyPart.material.get(ColorAttribute.class, ColorAttribute.Diffuse).color.set(Color.BLACK);
 								// emit1Part.node.detach();
 								if(enemyPart.node != null){
 									enemyPart.node.isAnimated = false;
 								}
 								detachedParts.add(enemyPart);
+								enemyPart.alive = false;
+								incrementCombo();
 							}else{
 								lastColor = enemyPart.material.get(ColorAttribute.class, ColorAttribute.Diffuse);
 							}
 						}else{
-							// TODO give energy back
+							resetCombo();
 						}
 						
 					}
@@ -455,8 +516,28 @@ abstract public class BattleScreen extends ScreenAdapter
 			}
 			
 		}
+		
+		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+		
+		stage.draw();
 	}
 	
+	private void incrementCharge(float delta) {
+		playerCharge += delta / CHARGE_SPEED;
+		if(playerCharge >= 1){
+			playerCharge = 0;
+			playerLife = Math.min(1, playerLife + RECOVERY_RATE);
+		}
+	}
+
+	private void incrementCombo() {
+		combo++;
+	}
+
+	private void resetCombo() {
+		combo = 0;
+	}
+
 	private boolean isRight() {
 		return Gdx.input.isKeyPressed(Input.Keys.D); // TODO universal
 	}
@@ -470,5 +551,7 @@ abstract public class BattleScreen extends ScreenAdapter
 		camera.viewportWidth = width;
 		camera.viewportHeight = height;
 		camera.update(true);
+		
+		stage.getViewport().update(width, height);
 	}
 }

@@ -30,7 +30,7 @@ public class Level2Screen extends BattleScreen
 		handRightPart = createPart("hand.r", "HandRight", false);
 		legAPart = createPart(null, "LegA", false);
 		legBPart = createPart(null, "LegB", true);
-		legCPart = createPart(null, "LegC", false);
+		legCPart = createPart(null, "LegC", true);
 		backLeftPart = createPart("back.emit.l", "BackLeft", false);
 		backRightPart = createPart("back.emit.r", "BackRight", true);
 		internalPart = createPart(null, "Internal", null);
@@ -39,23 +39,13 @@ public class Level2Screen extends BattleScreen
 		
 		sequenceFront();
 		
-		sequenceBackLeft();
-		sequenceBackRight();
-		sequenceTentacleLeft();
-		sequenceTentacleRight();
+//		sequenceBackLeft();
+//		sequenceBackRight();
+//		sequenceTentacleLeft();
+//		sequenceTentacleRight();
 		
 		
 		
-//		
-//		
-//		EnemyPart emit1Part = new EnemyPart();
-//		emit1Part.model = bossModel;
-//		emit1Part.node = bossModel.getNode("Emit1", true);
-//		emit1Part.material = bossModel.getMaterial("Active");
-//		emit1Part.id = collisionSystem.attachEntity(bossModel, "Active");
-//		emit1Part.energy = emit1Part.energyMax = 1; // energy in seconds of beam
-//		
-//		enemyParts.add(emit1Part);
 	}
 	
 	private EnemyPart createPart(String boneID, String materialID, Boolean light){

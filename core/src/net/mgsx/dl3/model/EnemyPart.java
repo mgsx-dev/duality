@@ -15,4 +15,5 @@ public class EnemyPart {
 	public float time;
 	public Vector3 direction;
 	public Boolean light;
+	public boolean alive = true;
 }
