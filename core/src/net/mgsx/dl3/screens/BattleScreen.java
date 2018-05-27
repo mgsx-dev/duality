@@ -35,7 +35,7 @@ import net.mgsx.dl3.model.Mob;
 import net.mgsx.dl3.utils.CollisionSystem;
 import net.mgsx.dl3.utils.Impact;
 
-public class BattleScreen extends ScreenAdapter
+abstract public class BattleScreen extends ScreenAdapter
 {
 	private Camera camera;
 	private ModelBatch batch;
@@ -44,9 +44,9 @@ public class BattleScreen extends ScreenAdapter
 	private Vector3 cameraPosition = new Vector3();
 	private Environment env;
 	private Model levelModel;
-	private ModelInstance bossModel;
-	private AnimationController bossAnimator;
-	private Actor bossActor;
+	protected ModelInstance bossModel;
+	protected AnimationController bossAnimator;
+	protected Actor bossActor;
 	private Array<Mob> mobs = new Array<Mob>();
 	private float cameraAngle;
 	private ImmediateModeRenderer20 shapeRenderer;
@@ -64,19 +64,19 @@ public class BattleScreen extends ScreenAdapter
 	
 	private Array<EnemyPart> detachedParts = new Array<EnemyPart>();
 	
-	private CollisionSystem collisionSystem;
+	protected CollisionSystem collisionSystem;
 	private int bossID;
 	
-	private EnemyPart emit1Part;
+	protected Array<EnemyPart> enemyParts = new Array<EnemyPart>();
 	
-	public BattleScreen() {
+	public BattleScreen(String modelFile) {
 		camera = new PerspectiveCamera(60f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.position.set(2, 2, 2);
 		camera.lookAt(Vector3.Zero);
 		camera.update();
 		batch = new ModelBatch();
 		
-		levelModel = new G3dModelLoader(new JsonReader()).loadModel(Gdx.files.internal("level1.g3dj"));
+		levelModel = new G3dModelLoader(new JsonReader()).loadModel(Gdx.files.internal(modelFile));
 		
 //		Model model = new ModelBuilder()
 //		.createBox(1f, 1f, 1f, 
@@ -87,16 +87,6 @@ public class BattleScreen extends ScreenAdapter
 		bossAnimator = new AnimationController(bossModel);
 		
 		bossActor = new Actor();
-		
-		bossActor.addAction(Actions.repeat(-1, Actions.sequence(
-			Actions.delay(2),
-			animate(bossAnimator, "Boss", "Clap1Open", 1),
-			Actions.repeat(3, Actions.sequence(
-					emit("Emit1", "Eye"),
-					Actions.delay(1))),
-			Actions.delay(2),
-			animate(bossAnimator, "Boss", "Clap1Open", -1)
-		)));
 		
 		env = new Environment();
 		env.add(new DirectionalLight().set(Color.WHITE, new Vector3(1, -3, 1).nor()));
@@ -114,16 +104,9 @@ public class BattleScreen extends ScreenAdapter
 		
 		collisionSystem.addModel(bossModel);
 		bossID = collisionSystem.attachEntity(bossModel, "Boss");
-		
-		emit1Part = new EnemyPart();
-		emit1Part.model = bossModel;
-		emit1Part.node = bossModel.getNode("Emit1", true);
-		emit1Part.material = bossModel.getMaterial("Active");
-		emit1Part.id = collisionSystem.attachEntity(bossModel, "Active");
-		emit1Part.energy = emit1Part.energyMax = 1; // energy in seconds of beam
 	}
 	
-	private Action emit(final String emitterID, final String emittedID) 
+	protected Action emit(final String emitterID, final String emittedID) 
 	{
 		return Actions.run(new Runnable() {
 			@Override
@@ -143,7 +126,7 @@ public class BattleScreen extends ScreenAdapter
 		});
 	}
 
-	private Action animate(final AnimationController animator, String nodeNameID, String animationID, final float speed){
+	protected Action animate(final AnimationController animator, String nodeNameID, String animationID, final float speed){
 		final String id = nodeNameID + "|" + animationID;
 		Action action = new Action() {
 			private AnimationDesc animation;
@@ -201,11 +184,11 @@ public class BattleScreen extends ScreenAdapter
 		
 		cameraPosition.x = MathUtils.cosDeg(cameraAngle) * cameraDistance;
 		cameraPosition.z = MathUtils.sinDeg(cameraAngle) * cameraDistance;
-		cameraPosition.y = 10;
+		cameraPosition.y = 2;
 		
 		camera.position.set(cameraPosition);
 		camera.up.set(Vector3.Y);
-		camera.lookAt(0, 5, 0);
+		camera.lookAt(0, 4, 0);
 		camera.update();
 		
 		Ray ray = null; 
@@ -287,18 +270,25 @@ public class BattleScreen extends ScreenAdapter
 			}
 			if(impact.id == bossID){
 				// nothing to do
-			}else if(impact.id == emit1Part.id){
-				// TODO flash part
-				emit1Part.energy -= delta;
+			}else{
 				
-				if(emit1Part.energy <= 0){
-					emit1Part.material.get(ColorAttribute.class, ColorAttribute.Diffuse).color.set(Color.BLACK);
-					// emit1Part.node.detach();
-					emit1Part.node.isAnimated = false;
-					detachedParts.add(emit1Part);
-				}else{
-					lastColor = emit1Part.material.get(ColorAttribute.class, ColorAttribute.Diffuse);
+				for(EnemyPart enemyPart : enemyParts){
+					if(impact.id == enemyPart.id){
+						
+						// TODO flash part
+						enemyPart.energy -= delta;
+						
+						if(enemyPart.energy <= 0){
+							enemyPart.material.get(ColorAttribute.class, ColorAttribute.Diffuse).color.set(Color.BLACK);
+							// emit1Part.node.detach();
+							enemyPart.node.isAnimated = false;
+							detachedParts.add(enemyPart);
+						}else{
+							lastColor = enemyPart.material.get(ColorAttribute.class, ColorAttribute.Diffuse);
+						}
+					}
 				}
+				
 			}
 		}
 		
@@ -322,7 +312,7 @@ public class BattleScreen extends ScreenAdapter
 			part.node.isAnimated = false;
 			part.time += delta;
 			if(part.node.translation.y < 0 || part.time > 30){
-				emit1Part.node.detach();
+				part.node.detach();
 				// part.model.nodes.removeValue(part.node, true);
 				detachedParts.removeIndex(i);
 			}else{

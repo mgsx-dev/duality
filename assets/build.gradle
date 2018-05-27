@@ -29,6 +29,11 @@ def level1G3D = fbxConvTask("build/blender/level1.fbx", "../android/assets/level
 level1G3D.dependsOn << level1FBX
 buildAssets.dependsOn << level1G3D
 
+def level2FBX = blenderExportFBX("src/level2.blend", "$buildDir/blender/level2.fbx")
+def level2G3D = fbxConvTask("build/blender/level2.fbx", "../android/assets/level2.g3dj")
+level2G3D.dependsOn << level2FBX
+buildAssets.dependsOn << level2G3D
+
 
 
 /** usage example :
