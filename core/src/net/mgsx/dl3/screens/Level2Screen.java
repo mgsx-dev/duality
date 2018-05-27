@@ -10,11 +10,11 @@ public class Level2Screen extends BattleScreen
 		bossActor.addAction(Actions.repeat(-1, Actions.sequence(
 				Actions.delay(2),
 				Actions.repeat(3, Actions.sequence(
-						emit("front.emit", "EyeDark"),
+						emit("front.emit", "EyeDark", false),
 						Actions.delay(1))),
 				Actions.delay(2),
 				Actions.repeat(3, Actions.sequence(
-						emit("front.emit", "EyeLight"),
+						emit("front.emit", "EyeLight", true),
 						Actions.delay(1)))
 			)));
 //		

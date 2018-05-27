@@ -13,7 +13,7 @@ public class Level1Screen extends BattleScreen
 				Actions.delay(2),
 				animate(bossAnimator, "Boss", "Clap1Open", 1),
 				Actions.repeat(3, Actions.sequence(
-						emit("Emit1", "Eye"),
+						emit("Emit1", "Eye", true),
 						Actions.delay(1))),
 				Actions.delay(2),
 				animate(bossAnimator, "Boss", "Clap1Open", -1)

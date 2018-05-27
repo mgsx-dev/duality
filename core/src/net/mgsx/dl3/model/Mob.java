@@ -11,4 +11,5 @@ public class Mob {
 	public float time;
 	public boolean alive = true;
 	public int id;
+	public boolean light;
 }

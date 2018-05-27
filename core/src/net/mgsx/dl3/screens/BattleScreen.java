@@ -54,7 +54,7 @@ abstract public class BattleScreen extends ScreenAdapter
 	private Vector3 rayEnd = new Vector3();
 	private Vector3 rayTan = new Vector3();
 	private Vector3 rayPos = new Vector3();
-	private ShaderProgram beamShader, burstShader;
+	private ShaderProgram beamShaderLight, beamShaderDark, burstShaderLight, burstShaderDark;
 	
 	private ColorAttribute lastColor;
 	private Color colorBackup = new Color();
@@ -92,13 +92,19 @@ abstract public class BattleScreen extends ScreenAdapter
 		env.add(new DirectionalLight().set(Color.WHITE, new Vector3(1, -3, 1).nor()));
 		env.set(new ColorAttribute(ColorAttribute.AmbientLight, new Color(Color.WHITE).mul(.5f)));
 		
-		beamShader = new ShaderProgram(Gdx.files.internal("shaders/beam.vs"), Gdx.files.internal("shaders/beam.fs"));
-		if(!beamShader.isCompiled()) throw new GdxRuntimeException(beamShader.getLog());
+		beamShaderLight = new ShaderProgram(Gdx.files.internal("shaders/beam.vs"), Gdx.files.internal("shaders/beam.fs"));
+		if(!beamShaderLight.isCompiled()) throw new GdxRuntimeException(beamShaderLight.getLog());
 		
-		burstShader = new ShaderProgram(Gdx.files.internal("shaders/burst.vs"), Gdx.files.internal("shaders/burst.fs"));
-		if(!burstShader.isCompiled()) throw new GdxRuntimeException(burstShader.getLog());
+		beamShaderDark = new ShaderProgram(Gdx.files.internal("shaders/beam.vs"), Gdx.files.internal("shaders/beam-dark.fs"));
+		if(!beamShaderDark.isCompiled()) throw new GdxRuntimeException(beamShaderDark.getLog());
 		
-		shapeRenderer = new ImmediateModeRenderer20(4, false, true, 1, beamShader);
+		burstShaderLight = new ShaderProgram(Gdx.files.internal("shaders/burst.vs"), Gdx.files.internal("shaders/burst.fs"));
+		if(!burstShaderLight.isCompiled()) throw new GdxRuntimeException(burstShaderLight.getLog());
+		
+		burstShaderDark = new ShaderProgram(Gdx.files.internal("shaders/burst.vs"), Gdx.files.internal("shaders/burst-dark.fs"));
+		if(!burstShaderDark.isCompiled()) throw new GdxRuntimeException(burstShaderDark.getLog());
+		
+		shapeRenderer = new ImmediateModeRenderer20(4, false, true, 1, beamShaderLight);
 		
 		collisionSystem = new CollisionSystem();
 		
@@ -106,7 +112,7 @@ abstract public class BattleScreen extends ScreenAdapter
 		bossID = collisionSystem.attachEntity(bossModel, "Boss");
 	}
 	
-	protected Action emit(final String emitterID, final String emittedID) 
+	protected Action emit(final String emitterID, final String emittedID, final boolean light) 
 	{
 		return Actions.run(new Runnable() {
 			@Override
@@ -121,6 +127,7 @@ abstract public class BattleScreen extends ScreenAdapter
 				mob.position.setZero().mul(emitter.globalTransform);
 				mob.direction.set(Vector3.Y).rot(emitter.globalTransform);
 				mob.id = collisionSystem.attachEntity(model);
+				mob.light = light;
 				mobs.add(mob);
 			}
 		});
@@ -168,6 +175,8 @@ abstract public class BattleScreen extends ScreenAdapter
 			return;
 		}
 		touched = Gdx.input.isTouched();
+		
+		boolean lightRay = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 		
 		time += delta;
 		
@@ -249,7 +258,7 @@ abstract public class BattleScreen extends ScreenAdapter
 			}
 		}
 		
-		float lum = .5f;
+		float lum = .3f;
 		Gdx.gl.glClearColor(lum, lum, lum, 0);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
@@ -265,7 +274,9 @@ abstract public class BattleScreen extends ScreenAdapter
 			
 			for(Mob mob : mobs){
 				if(mob.id == impact.id){
-					mob.alive = false; // TODO energy
+					if(lightRay != mob.light){
+						mob.alive = false; // TODO energy
+					}
 				}
 			}
 			if(impact.id == bossID){
@@ -275,17 +286,23 @@ abstract public class BattleScreen extends ScreenAdapter
 				for(EnemyPart enemyPart : enemyParts){
 					if(impact.id == enemyPart.id){
 						
-						// TODO flash part
-						enemyPart.energy -= delta;
-						
-						if(enemyPart.energy <= 0){
-							enemyPart.material.get(ColorAttribute.class, ColorAttribute.Diffuse).color.set(Color.BLACK);
-							// emit1Part.node.detach();
-							enemyPart.node.isAnimated = false;
-							detachedParts.add(enemyPart);
+						if(lightRay != enemyPart.light){
+							
+							// TODO flash part
+							enemyPart.energy -= delta;
+							
+							if(enemyPart.energy <= 0){
+								enemyPart.material.get(ColorAttribute.class, ColorAttribute.Diffuse).color.set(Color.BLACK);
+								// emit1Part.node.detach();
+								enemyPart.node.isAnimated = false;
+								detachedParts.add(enemyPart);
+							}else{
+								lastColor = enemyPart.material.get(ColorAttribute.class, ColorAttribute.Diffuse);
+							}
 						}else{
-							lastColor = enemyPart.material.get(ColorAttribute.class, ColorAttribute.Diffuse);
+							// TODO give nergy back
 						}
+						
 					}
 				}
 				
@@ -341,7 +358,13 @@ abstract public class BattleScreen extends ScreenAdapter
 			rayStart.y -= 1f;
 			
 			Gdx.gl.glEnable(GL20.GL_BLEND);
-			Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+			
+			if(lightRay)
+				Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+			else
+				Gdx.gl.glBlendFuncSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+			
+			ShaderProgram beamShader = lightRay ? beamShaderLight : beamShaderDark;
 			
 			beamShader.begin();
 			beamShader.setUniformf("u_time", time);
@@ -375,6 +398,8 @@ abstract public class BattleScreen extends ScreenAdapter
 			
 			
 			if(impact.occured){
+				
+				ShaderProgram burstShader =  lightRay ? burstShaderLight : burstShaderDark;
 				
 				float impactSize = 3f;
 				shapeRenderer.begin(camera.combined, GL20.GL_TRIANGLE_STRIP);
