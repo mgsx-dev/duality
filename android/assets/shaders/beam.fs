@@ -26,7 +26,7 @@ void main() {
 	
 	float tra = TRAPEZE(v_texCoord0.x, 2.0);
 	// float tra2 = TRAPEZE(v_col.y, 2.0);
-	float signal1 = sin(v_texCoord0.y * 2 + u_time * 3.387) * 0.25;
+	float signal1 = sin(v_texCoord0.y * 2.0 + u_time * 3.387) * 0.25;
 	float signal2 = sin(v_texCoord0.y * 3.12 - u_time * 43.456) * 0.25;
 	float signal = (signal1 * signal2 * 4.0);
 	float l = 1.0 - clamp(abs(signal - v_texCoord0.x + 0.5), 0.0, 1.0);
